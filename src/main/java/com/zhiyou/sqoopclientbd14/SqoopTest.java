@@ -4,14 +4,16 @@ import java.util.List;
 
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.validation.Status;
 
 public class SqoopTest {
 
-	//服务端url
+	//服务端url, 需要加个"/"
 	private final String URL = 
-			"http://master:12000/sqoop";
+			"http://master:12000/sqoop/";
 	//client
 	private SqoopClient client = 
 			new SqoopClient(URL);
@@ -31,9 +33,34 @@ public class SqoopTest {
 		
 		List<MConfig> configs = linkConfig.getConfigs();
 		for(MConfig config : configs){
-			System.out.println("所有配置项"+config.toString());
+//			System.out.println("所有配置项"+config.toString());
+			
+			List<MInput<?>> inputs = config.getInputs();
+			for(MInput input : inputs){
+				System.out.println(input);
+			}
 		}
+		//MlinkConfig相关配置项
+		linkConfig.getStringInput("linkConfig.jdbcDriver")
+		.setValue("com.mysql.jdbc.Driver");
 		
+		linkConfig.getStringInput("linkConfig.connectionString")
+		.setValue("jdbc:mysql://192.168.58.1:3306/test");
+		
+		linkConfig.getStringInput("linkConfig.username")
+		.setValue("root");
+		
+		linkConfig.getStringInput("linkConfig.password")
+		.setValue("root");
+		
+		linkConfig.getStringInput("dialect.identifierEnclose")
+		.setValue("`");
+		Status status = client.saveLink(link);
+		if(status.canProceed()){
+			System.out.println("创建link"+link.getName()+"成功");
+		}else{
+			System.out.println("fail create link");
+		}
 	}
 	
 	
@@ -41,29 +68,6 @@ public class SqoopTest {
 		SqoopTest sqoopTest = new SqoopTest();
 		sqoopTest.createLink();
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 }
